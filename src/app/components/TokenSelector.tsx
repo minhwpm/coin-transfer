@@ -72,7 +72,7 @@ export const TokenSelector = () => {
     dispatch(closeSelector());
   };
 
-  return isClient ? (
+  return (
     <div
       className={classNames(
         "fixed top-0 left-0 right-0 bottom-0 p-4 flex items-center justify-center z-50 bg-slate-100/10 backdrop-blur-md",
@@ -100,27 +100,28 @@ export const TokenSelector = () => {
             />
           </div>
         </div>
-
-        <div onScroll={handleScroll} className="overflow-auto pb-5">
-          <ul className="pb-5 flex flex-col gap-2">
-            {coins.map((coin) => (
-              <li
-                key={coin.coin_type}
-                onClick={() => handleSelect(coin)}
-                className="px-4 py-1 cursor-pointer hover:bg-slate-100"
-              >
-                <Token coin={coin} />
-              </li>
-            ))}
-          </ul>
-          <div className="flex items-center justify-center p-4">
-            {(isLoading || isFetchingNextPage) && <p>Loading...</p>}
-            {!hasNextPage && !isSearching && !isLoading && (
-              <p>No more coins to load</p>
-            )}
+        {isClient && (
+          <div onScroll={handleScroll} className="overflow-auto pb-5">
+            <ul className="pb-5 flex flex-col gap-2">
+              {coins.map((coin) => (
+                <li
+                  key={coin.coin_type}
+                  onClick={() => handleSelect(coin)}
+                  className="px-4 py-1 cursor-pointer hover:bg-slate-100"
+                >
+                  <Token coin={coin} />
+                </li>
+              ))}
+            </ul>
+            <div className="flex items-center justify-center p-4">
+              {(isLoading || isFetchingNextPage) && <p>Loading...</p>}
+              {!hasNextPage && !isSearching && !isLoading && (
+                <p>No more coins to load</p>
+              )}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
-  ) : null;
+  );
 };

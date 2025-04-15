@@ -88,50 +88,81 @@ export const Wallet = () => {
     );
   };
 
-  const renderTransaction = () => (
-    <div className="flex flex-wrap justify-between gap-4 mb-4 p-4 text-slate-500 bg-slate-100 rounded-2xl">
+  const renderTransactionForm = () => (
+    <form onSubmit={handleSubmit} className="flex flex-col gap-2 mb-4 w-full">
       <div className="flex flex-col gap-2 mb-4">
-        <label className="text-sm font-bold">You send</label>
+        <label className="text-sm font-bold sm:text-left">
+          Receiver address
+        </label>
+        <input
+          type="text"
+          name="receiverAddress"
+          placeholder="Input receiver address"
+          aria-label="Input receiver address"
+          className="border border-solid border-black/[.08] rounded-full h-10 sm:h-12 px-4 sm:px-5 w-full"
+        />
+      </div>
+      <div className="flex flex-wrap justify-between gap-4 mb-4 p-4 text-slate-500 bg-slate-100 rounded-2xl">
+        <div className="flex flex-col gap-2 mb-4">
+          <label className="text-sm font-bold">You send</label>
 
-        <div
-          onClick={() => dispatch(openSelector())}
-          className="cursor-pointer hover:bg-slate-200 border border-solid border-black/[.08] rounded-full w-24 h-10 sm:h-12 px-2 flex items-center"
-        >
-          <span>{selectedCoin.symbol ?? "SUI"}</span>
-          <span className="ml-auto">
-            <IoIosArrowDown size={20} />
-          </span>
+          <div
+            onClick={() => dispatch(openSelector())}
+            className="cursor-pointer hover:bg-slate-200 border border-solid border-black/[.08] rounded-full w-24 h-10 sm:h-12 px-2 flex items-center"
+          >
+            <span>{selectedCoin.symbol ?? "SUI"}</span>
+            <span className="ml-auto">
+              <IoIosArrowDown size={20} />
+            </span>
+          </div>
+
+          <input hidden name="coinType" type="text" value={coinType} readOnly />
+
+          <div className="pl-2 text-sm flex items-center gap-2">
+            <TfiWallet size={15} />
+            <span>
+              {selectedCoin.name !== "SUI"
+                ? selectedCoin.balance ?? 0
+                : balance
+                ? parseFloat(balance) / 1e9
+                : 0}
+            </span>
+          </div>
         </div>
 
-        <input hidden name="coinType" type="text" value={coinType} readOnly />
-
-        <div className="pl-2 text-sm flex items-center gap-2">
-          <TfiWallet size={15} />
-          <span>
-            {selectedCoin.name !== "SUI"
-              ? selectedCoin.balance ?? 0
-              : balance
-              ? parseFloat(balance) / 1e9
-              : 0}
-          </span>
+        <div className="flex flex-col items-end gap-2 mb-4">
+          <div className="flex items-center justify-end space-x-1 text-sm font-bold text-red-600">
+            <div className="cursor-pointer rounded-md px-1 hover:bg-red-50">
+              Half
+            </div>
+            <div className="cursor-pointer rounded-md px-1 hover:bg-red-50">
+              Max
+            </div>
+          </div>
+          <FormattedBigDecimalInput name="amount" />
         </div>
       </div>
-
-      <div className="flex flex-col items-end gap-2 mb-4">
-        <div className="flex items-center justify-end space-x-1 text-sm font-bold text-red-600">
-          <div className="cursor-pointer rounded-md px-1 hover:bg-red-50">
-            Half
-          </div>
-          <div className="cursor-pointer rounded-md px-1 hover:bg-red-50">
-            Max
-          </div>
-        </div>
-        <FormattedBigDecimalInput name="amount" />
-      </div>
-    </div>
+      {/* <ConnectButton connectText="Connect wallet" /> */}
+      {currentAccount ? (
+        <input
+          type="submit"
+          value="Send"
+          className="bg-slate-800 font-semibold w-full rounded-full px-8 py-3 text-slate-100"
+        />
+      ) : (
+        <ConnectButton connectText="Connect wallet" />
+      )}
+    </form>
   );
 
-  if (!isClient) return renderTransaction();
+  if (!isClient || wallets.length === 0) return (
+    <>
+      {renderTransactionForm()}
+      <Suspense fallback="Loading token selector...">
+        {isOpen && <TokenSelector />}
+      </Suspense>
+    </>
+  );
 
   return (
     <>
@@ -150,36 +181,7 @@ export const Wallet = () => {
                 <span>{shortenAddress(currentAccount.address)}</span>
               </div>
             )}
-
-            <form
-              onSubmit={handleSubmit}
-              className="flex flex-col gap-2 mb-4 w-full"
-            >
-              <div className="flex flex-col gap-2 mb-4">
-                <label className="text-sm font-bold text-center sm:text-left">
-                  Receiver address
-                </label>
-                <input
-                  type="text"
-                  name="receiverAddress"
-                  placeholder="Input receiver address"
-                  aria-label="Input receiver address"
-                  className="border border-solid border-black/[.08] rounded-full h-10 sm:h-12 px-4 sm:px-5 w-full"
-                />
-              </div>
-
-              {renderTransaction()}
-
-              {currentAccount ? (
-                <input
-                  type="submit"
-                  value="Send"
-                  className="bg-slate-800 font-semibold w-full rounded-full px-8 py-3 text-slate-100"
-                />
-              ) : (
-                <ConnectButton connectText="Connect wallet" />
-              )}
-            </form>
+            {renderTransactionForm()}
           </div>
         ))}
       </div>
